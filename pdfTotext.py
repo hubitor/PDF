@@ -5,7 +5,7 @@ from pdfminer.pdfpage import PDFPage
 from io import StringIO
 
 def convert_pdf_to_txt(path):
-        path = 'C:\\Users\\MikeLesKi\\Desktop\\Lineup.pdf'
+        path = 'C:\\Users\\xxxxxx\\Desktop\\Lineup.pdf'
         rsrcmgr = PDFResourceManager()
         retstr = StringIO()
         codec = 'utf-8'
