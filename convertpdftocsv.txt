@@ -1,0 +1,110 @@
+I want to automate something in by opening PDF file in Adobe Acrobat Pro DC and then using function that is available in that version to export all data in to excel spreadsheet.
+
+Is there a way that I can have a script that opens the PDF file and exports all data in that file into an Excel sheet?
+
+Is there maybe a way to Open PDF by pywin32 and then save file as Excel or CSV?
+
+Here is the code I am trying to use but it does not work
+
+import win32com.client
+import win32com.client.makepy
+
+win32com.client.makepy.GenerateFromTypeLibSpec('Acrobat')
+adobe = win32com.client.DispatchEx('AcroExch.App')
+avDoc = win32com.client.DispatchEx('AcroExch.AVDoc')
+avDoc.Open('Input.pdf', 'C:\\Users\\PDF\\')
+pdDoc = avDoc.GetPDDoc()
+jObject = pdDoc.GetJSObject()
+jObject.SaveAs('Output.xlsx', "com.adobe.acrobat.xlsx")
+python python-3.x python-2.7 adobe
+shareimprove this question
+edited Nov 27 '17 at 14:27
+asked Nov 24 '17 at 10:53
+
+Denis Morozov
+287
+add a comment
+2 Answers
+active oldest votes
+
+2
+
+Here is the anwser figured out by me:
+
+import win32com.client, win32com.client.makepy, os, winerror, pandas as pd, errno, re
+from win32com.client.dynamic import ERRORS_BAD_CONTEXT
+
+excel_file = "output.xlsx"
+output_1 = "output_1.csv"
+
+ERRORS_BAD_CONTEXT.append(winerror.E_NOTIMPL)
+
+src = os.path.abspath('FILE.pdf')
+
+win32com.client.makepy.GenerateFromTypeLibSpec('Acrobat')
+adobe = win32com.client.DispatchEx('AcroExch.App')
+avDoc = win32com.client.DispatchEx('AcroExch.AVDoc')
+avDoc.Open(src, src)
+pdDoc = avDoc.GetPDDoc()
+jObject = pdDoc.GetJSObject()
+jObject.SaveAs(excel_file, "com.adobe.acrobat.xlsx")
+shareimprove this answer
+answered Nov 27 '17 at 15:35
+
+Denis Morozov
+287
+add a comment
+
+ 
+0
+
+The answer above works great to convert PDF to Excel.
+
+I used it as an example and modified it to convert PDF-PPTX files back to native PowerPoint .PPTX files.
+
+All it took was a simple modification of the file extensions and names. This solution requires me to have Adobe Acrobat Professional installed locally. (I have Acrobat X.) The Python script calls the Adobe Acrobat Exchange application (part of Acrobat Pro). And it doesn't cost anything more than the Acrobat Pro license that I already have.
+
+The only issue is that I can't figure out how to close the file and the application after the conversion process is done. It leaves Adobe Acrobat processes running in the background that I have to kill with Windows Task Manager. But I can use this as the basis of a bulk converter for the 115+ PDF-PPTX files that I want back in PPTX format for editing ( I don't have the PPTX source files.)
+
+Here's the PDF to Excel converter code:
+
+#%% convert PDF to Excel format.  
+# Open PDF file, use Acrobat Exchange to save file as .xlsx file.
+import win32com.client, win32com.client.makepy, os, winerror, errno, re
+from win32com.client.dynamic import ERRORS_BAD_CONTEXT
+
+excel_file = "output.xlsx"
+output_1 = "output_1.csv"
+
+ERRORS_BAD_CONTEXT.append(winerror.E_NOTIMPL)
+
+src = os.path.abspath('test-conversion.pdf')
+
+win32com.client.makepy.GenerateFromTypeLibSpec('Acrobat')
+adobe = win32com.client.DispatchEx('AcroExch.App')
+avDoc = win32com.client.DispatchEx('AcroExch.AVDoc')
+avDoc.Open(src, src)
+pdDoc = avDoc.GetPDDoc()
+jObject = pdDoc.GetJSObject()
+jObject.SaveAs(excel_file, "com.adobe.acrobat.xlsx")
+And then here's the PDF-PPTX converter.
+
+#%% convert PDF-PPTX file back to native PowerPoint.PPTX format.  
+# Open PDF file, use Acrobat Exchange to save file as .PPTX file.
+import win32com.client, win32com.client.makepy, os, winerror, errno, re
+from win32com.client.dynamic import ERRORS_BAD_CONTEXT
+
+pptx_file = "output2.pptx"
+#output_1 = "output_1.csv"
+
+ERRORS_BAD_CONTEXT.append(winerror.E_NOTIMPL)
+
+src = os.path.abspath('continuous-variables.pdf')
+
+win32com.client.makepy.GenerateFromTypeLibSpec('Acrobat')
+adobe = win32com.client.DispatchEx('AcroExch.App')
+avDoc = win32com.client.DispatchEx('AcroExch.AVDoc')
+avDoc.Open(src, src)
+pdDoc = avDoc.GetPDDoc()
+jObject = pdDoc.GetJSObject()
+jObject.SaveAs(pptx_file, "com.adobe.acrobat.pptx")
